@@ -11,9 +11,9 @@ def GetOrders(request):
     return render(request, 'orders.html', {'data' : {
         'current_date': date.today(),
         'orders': [
-            {'title': 'Книга с картинками', 'id': 1},
-            {'title': 'Бутылка с водой', 'id': 2},
-            {'title': 'Коврик для мышки', 'id': 3},
+            {'title': 'Копирайтер', 'salary': 50000, 'company': 'Копи-копи', 'city': 'Москва', 'exp': 'Без опыта', 'image': "https://w7.pngwing.com/pngs/299/589/png-transparent-social-media-computer-icons-technical-computer-network-text-computer.png", 'id': 1},
+            {'title': 'Менеджер блогера', 'salary': 10000, 'company': 'Co_blog', 'city': 'Москва','exp': 'Без опыта','image' :None,'id': 2},
+            {'title': 'Куратор', 'salary': 7000, 'company': 'Вебскул', 'city': 'Без города','exp': 'Без опыта', 'id': 3},
         ]
     }})
 
