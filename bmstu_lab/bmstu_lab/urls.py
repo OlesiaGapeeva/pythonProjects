@@ -20,8 +20,8 @@ from bmstu_lab1 import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', views.GetOrders),
-    path('order/<int:id>/', views.GetOrder, name='order_url'),
+    path('', views.GetVacancies),
+    path('vacancy/<int:id>/', views.GetVacancy, name='order_url'),
     path('sendText', views.sendText, name='sendText'),
 ]
 

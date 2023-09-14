@@ -4,15 +4,15 @@
 
 {% block content %} 
 <div class="search">
-<form action="sendText" method="post" enctype="multipart/form-data" style="margin-left: 30%;">
+<form action="sendText" method="post" enctype="multipart/form-data" class="line_s">
     {% csrf_token %}
     <input name="text" type="text" class= "form">
-    <input type="submit" class="btn btn-outline-light" style="vertical-align: 0.5px;" value="Поиск">
+    <input type="submit" class = "btn_search" style="vertical-align: 0.5px;" value="Поиск">
   </form>
 </div>
 <ul>
-     {% for order in data.orders %}
-       {% include 'order_element.html' with element=order %}
+     {% for vacancy in data.vacancies %}
+       {% include 'vacancy_element.html' with element=vacancy %}
     {% empty %}
         <li>Список пуст</li>
     {% endfor %}
