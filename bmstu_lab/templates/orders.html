@@ -2,9 +2,16 @@
 
 {% block title %}Список заказов{% endblock %}
 
-{% block content %}
+{% block content %} 
+<div class="search">
+<form action="sendText" method="post" enctype="multipart/form-data" style="margin-left: 30%;">
+    {% csrf_token %}
+    <input name="text" type="text" class= "form">
+    <input type="submit" class="btn btn-outline-light" style="vertical-align: 0.5px;" value="Поиск">
+  </form>
+</div>
 <ul>
-    {% for order in data.orders %}
+     {% for order in data.orders %}
        {% include 'order_element.html' with element=order %}
     {% empty %}
         <li>Список пуст</li>
