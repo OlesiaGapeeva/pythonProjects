@@ -3,7 +3,7 @@
 {% block title %}Информация о вакансии {{ data.vacancy.company }}{% endblock %}
 
 {% block content %}
-<div class="card">
+<div class="card vacancy_card">
     <div class="card-body">
       <h5 class="vacancy_text">{{ data.vacancy.title }}</h5>
       <p class="money" style="color: black;">{{ data.vacancy.salary }}<p>
@@ -15,10 +15,10 @@
       <button type="button" class="btn_apply vacancy_apply">Откликнуться</button>
     </div>
   </div>
-  <div class="card">
+  <div class="card vacancy_card">
     <div class="card-body">
         {% if data.vacancy.image %}
-        <img src="{{ data.vacancy.image }}" width="150" height="150" alt="Картинка" >
+        <img src="{{ data.vacancy.image }}" class="img_card" alt="Картинка" >
         {% endif %}
        <div class="money">{{ data.vacancy.company }}</div>
        {% if  data.vacancy.city %}

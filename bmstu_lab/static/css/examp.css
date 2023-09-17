@@ -64,7 +64,7 @@
 }
 
 .card {
-  width: 80%;
+  width: 60%;
   background-color: rgb(246, 246, 246);
   margin-bottom: 20px;
   margin-left: auto;
@@ -79,6 +79,9 @@
   padding: 1rem;
 }
 
+.vacancy_card{
+  width: 80%;
+}
 .card-link {
   color: #0056b3;
   font-size: 1.8em;
@@ -103,6 +106,11 @@
   width: 150px;
   height: 150px;
   border-radius: 8px;
+}
+
+.img_card{
+  width: 150px;
+  height: 150px;
 }
 
 .btn_apply {

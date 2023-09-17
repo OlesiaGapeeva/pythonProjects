@@ -4,9 +4,9 @@
 
 {% block content %} 
 <div class="search">
-<form action="sendText" method="post" enctype="multipart/form-data" class="line_s">
+<form method="get" action="{% url 'vacancies' %}" enctype="multipart/form-data" class="line_s">
     {% csrf_token %}
-    <input name="text" type="text" class= "form">
+    <input name="keyword" type="text" class= "form" placeholder="Введите вакансию">
     <input type="submit" class = "btn_search" style="vertical-align: 0.5px;" value="Поиск">
   </form>
 </div>
@@ -14,7 +14,7 @@
      {% for vacancy in data.vacancies %}
        {% include 'vacancy_element.html' with element=vacancy %}
     {% empty %}
-        <li>Список пуст</li>
+        <p class="vacancy_card-text">К сожалению, по вашему запросу ничего не удалось найти</p>
     {% endfor %}
 </ul>
 {% endblock %}

@@ -1,12 +1,6 @@
 from django.shortcuts import render
 from datetime import date
 
-def hello(request):
-    return render(request, 'index.html', { 'data' : {
-        'current_date': date.today(),
-        'list': ['python', 'django', 'html']
-    }})
-
 def GetData(id):
     data = [
             {'title': 'Копирайтер', 'adress': 'Алексеевская', 'time':'Полный день', 'salary': 50000, 'company': 'Копи-копи', 'city': 'Москва', 'exp': 'Без опыта', 'image': "https://w7.pngwing.com/pngs/299/589/png-transparent-social-media-computer-icons-technical-computer-network-text-computer.png", 'id': 1, 'info': 'Компания "Копи-копи" стремится к совершенству и инновациям. Ее команда талантливых копирайтеров постоянно ищет новые способы выразить идеи и повысить эффективность коммуникации. С каждым текстом, созданным "Копи-копи", они продолжают укреплять свою репутацию как надежного партнера, который доставляет не только качественные тексты, но и вдохновение, которое воплощается в каждом слове.','requirements' :['Отличное владение русским языком', 'Умение писать грамотные тексты', 'Креативность и внимательность к деталям'], 'conditions': ['Гибкий график работы', 'Возможность удаленной работы', 'Оплачиваемый отпуск', 'Профессиональное развитие и обучение', 'Дружеская и поддерживающая рабочая атмосфера']},
@@ -38,6 +32,7 @@ def GetData(id):
     'salary': 7000,
     'time': 'Удаленная работа',
     'company': 'Вебскул',
+    'image': 'https://cdn1.dizkon.ru/images/contests/2017/08/15/5992c98e5cd2e.700x534.80.jpg',
     'exp': 'Без опыта',
     'id': 3,
     'info': 'Вебскул - компания, которая изменила пейзаж онлайн-образования. Они были основаны группой страстных преподавателей и разработчиков, которые верили в доступность и качество образования для всех. Вебскул разработал инновационную веб-платформу, которая объединяет учителей и учеников со всего мира. С помощью передовых технологий и интерактивных методик обучения, Вебскул предлагает образовательные курсы в различных областях знаний. Компания стремится изменить способ, которым люди учатся и развиваются, и дает возможность каждому раскрыть свой потенциал независимо от места проживания или времени.',
@@ -79,27 +74,33 @@ def GetData(id):
         return data
     return data[id - 1]
 
-def GetVacancies(request):
-    return render(request, 'vacancies.html',{'data' : {
-        'current_date': date.today(),
-        'vacancies': GetData(-1)}})
+# def GetVacancies(request):
+#     # a = GetData(-1)
+#     # vacancies = []
+#     # for i in a:
+#     #     if key in ['title']:
+#     #         vacancies.append(i)
+#     return render(request, 'vacancies.html',{'data' : {
+#         'current_date': date.today(),
+#         'vacancies': GetData(-1)}})
 
-# def GetOrders(request):
-    return render(request, 'orders.html', {'data' : {
+def GetVacancies(request):
+    keyword = request.GET.get('keyword')
+    a = GetData(-1)
+    if not keyword:
+        return render(request, 'vacancies.html', {'data': {
         'current_date': date.today(),
-        'orders': [
-            {'title': 'Копирайтер', 'salary': 50000, 'company': 'Копи-копи', 'city': 'Москва', 'exp': 'Без опыта', 'image': "https://w7.pngwing.com/pngs/299/589/png-transparent-social-media-computer-icons-technical-computer-network-text-computer.png", 'id': 1},
-            {'title': 'Менеджер блогера', 'salary': 10000, 'company': 'Co_blog', 'city': 'Москва','exp': 'Без опыта','image' :None,'id': 2},
-            {'title': 'Куратор', 'salary': 7000, 'company': 'Вебскул', 'city': 'Без города','exp': 'Без опыта', 'id': 3},
-        ]
-    }})
+        'vacancies': a}})
+    vacancies = []
+    for i in a:
+        if keyword and keyword.lower() in i.get('title', '').lower():
+            vacancies.append(i)
+    return render(request, 'vacancies.html', {'data': {
+        'current_date': date.today(),
+        'vacancies': vacancies}})
 
 def GetVacancy(request, id):
     return render(request, 'vacancy.html', {'data' : {
         'current_date': date.today(),
         'vacancy': GetData(id)
     }})
-
-def sendText(request):
-    input_text = request.POST['text']
-    return render(request, 'index.html')
