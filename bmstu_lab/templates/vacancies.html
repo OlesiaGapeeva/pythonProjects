@@ -6,7 +6,7 @@
 <div class="search">
 <form method="get" action="{% url 'vacancies' %}" enctype="multipart/form-data" class="line_s">
     {% csrf_token %}
-    <input name="keyword" type="text" class= "form" placeholder="Введите вакансию">
+    <input name="keyword" type="text" class= "form" placeholder="Введите вакансию" value="{{ search_query }}"">
     <input type="submit" class = "btn_search" style="vertical-align: 0.5px;" value="Поиск">
   </form>
 </div>
