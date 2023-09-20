@@ -5,7 +5,9 @@
         {% if element.image %}
         <img src="{{ element.image }}" width="150" height="150" alt="Картинка" class="img">
         {% endif %}
-      <p> <div>{{ element.company }}</div>
+        {% if element.city %}
+        <p> <div>{{ element.company }}</div>
+        {% endif %}
       <div>{{ element.city }}</div> </p>
       <p></p>
       <p>

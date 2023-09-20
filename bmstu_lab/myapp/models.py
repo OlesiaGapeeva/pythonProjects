@@ -13,7 +13,8 @@ class Responses(models.Model):
     creation_date = models.DateField(blank=True, null=True)
     approving_date = models.DateField(blank=True, null=True)
     publication_date = models.DateField(blank=True, null=True)
-    moderator = models.CharField(max_length=255, blank=True, null=True)
+    id_moderator = models.ForeignKey('Users', on_delete=models.CASCADE,  db_column='id_moderator', related_name='moderator_responses')
+    id_user = models.ForeignKey('Users', on_delete=models.CASCADE, db_column='id_user', related_name='user_responses')
 
     class Meta:
         managed = False
@@ -21,7 +22,7 @@ class Responses(models.Model):
 
 
 class ResponsesVacancies(models.Model):
-    id_responses = models.ForeignKey(Responses, models.DO_NOTHING, db_column='id_responses', blank=True, null=True)
+    id_responses = models.ForeignKey('Responses', models.DO_NOTHING, db_column='id_responses', blank=True, null=True)
     id_vacancies = models.ForeignKey('Vacancies', models.DO_NOTHING, db_column='id_vacancies', blank=True, null=True)
 
     class Meta:
@@ -30,7 +31,7 @@ class ResponsesVacancies(models.Model):
 
 
 class Users(models.Model):
-    login = models.IntegerField(blank=True, null=True)
+    login = models.CharField(blank=True, null=True)
     passw = models.CharField(blank=True, null=True)
 
     class Meta:
@@ -44,9 +45,9 @@ class Vacancies(models.Model):
     adress = models.CharField(max_length=255, blank=True, null=True)
     time = models.CharField(max_length=255, blank=True, null=True)
     salary = models.IntegerField()
-    company = models.CharField(max_length=255, blank=True, null=True)
-    city = models.CharField(max_length=255, blank=True, null=True)
-    exp = models.CharField(max_length=255, blank=True, null=True)
+    company = models.CharField(max_length=255, blank=True)
+    city = models.CharField(max_length=255, blank=True)
+    exp = models.CharField(max_length=255, blank=True)
     image = models.TextField(blank=True, null=True)
     info = models.TextField(blank=True, null=True)
     requirements = ArrayField(models.TextField(blank=True, null=True))
