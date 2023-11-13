@@ -1,0 +1,57 @@
+
+.hat {
+    //position: relative; 
+    background-color: rgb(243, 242, 242);
+    margin-top: 0%; 
+    display: flex;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    grid-gap: 20px;
+    overflow: hidden; /* Add this line to hide overflow */
+}
+
+.header {
+    position: fixed; /* Add this line for sticky positioning */
+    text-align: center; 
+    font-family: sans-serif;
+    top: 0; /* Add this line to position at the top */
+    z-index: 9999; /* Adjust the z-index as needed */
+  
+    &__title {
+      font-weight: 900; 
+      margin-top: 25px; 
+      color: white; 
+      text-shadow: 0 0 1px #ffffff;
+    }
+    &__slogan {
+      margin-bottom: 30px; 
+    }
+}
+
+.card{
+  width: 80vw;
+  background-color: rgb(246, 246, 246);
+  margin-bottom: 20px;
+  margin-left: auto;
+  position: relative;
+  margin-right: auto;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+}
+
+.cards{
+  margin: auto;
+}
+
+.submit-btn {
+  color: white; 
+  background-color: #f53100; 
+  border: none; 
+  height: 60px; 
+  font-size: 20px; 
+  border-radius: 10px 10px 10px 10px; 
+  width: 200px; 
+  margin-left: 20px;
+  font-family: sans-serif;
+}

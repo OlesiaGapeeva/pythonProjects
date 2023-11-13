@@ -1,0 +1,48 @@
+.header {
+    display: flex;
+    position: fixed;
+    top: 0;
+    left: -20px;
+    align-items: center;
+    margin-top: 0;
+    background-color: #0066ff;
+    color: #ffffff;
+    width: 100vw;
+  
+    &__wrapper {
+      flex: 1;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-right: 20px; // Добавлено для создания отступа между профилем и правым краем
+    }
+  
+    &__img {
+      text-align: left;
+      margin-left: 30px;
+      display: flex;
+      align-items: center;
+      position: relative;
+    }
+  
+    &__profileWrapper {
+      display: flex;
+      align-items: center;
+    }
+  
+    &__profile {
+      color: #ffffff;
+    }
+
+    &__logo {
+        color: #ffffff;
+        display: flex;
+        justify-content: center; // Centers the text horizontally
+        align-items: center; // Centers the text vertically
+        text-align: center;
+      }
+  
+    &__spacer {
+      font-size: 16px; // Измените размер шрифта по вашему усмотрению
+    }
+  }
