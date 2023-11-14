@@ -3,7 +3,7 @@ import { ChangeEvent } from 'react';
 import { Link } from 'react-router-dom';
 import Form from 'react-bootstrap/Form';
 import Button from 'react-bootstrap/Button';
-import Dropdown from 'react-bootstrap/Dropdown';
+//import Dropdown from 'react-bootstrap/Dropdown';
 import Header from '../../components/header';
 import OneCard from '../../components/card';
 import styles from './main.module.scss';
@@ -132,7 +132,7 @@ const MainPage: React.FC = () => {
     return (
         <div className={styles.main_page}>
             <Header/>
-            <nav aria-label="breadcrumb">
+            <nav aria-label="breadcrumb" style={{zIndex: '2'}}>
             <ol className="breadcrumb" style={{ marginTop: '80px' , width: '95.53vw', maxHeight: '100vw'}}>
             <li className="breadcrumb-item">
                 <Link style={{ color: 'rgb(0, 102, 255)' }} to="/vacancies">
@@ -190,7 +190,7 @@ const MainPage: React.FC = () => {
                             </div>
                         ))}
                     </div>
-                {vacancies.length === 0 && <p className="dish-text"> <big>Такой вакансии не существует</big></p>}
+                {vacancies.length === 0 && <p className="dish-text" style={{ textAlign: "left", marginLeft: "-40vw", marginRight: "auto" }}> Такой вакансии не существует</p>}
             </div>
         </div>
      )

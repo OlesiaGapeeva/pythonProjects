@@ -21,7 +21,7 @@ const Header: React.FC = () => {
           </div>
           <Link to='/vacancies' className={styles.header__logo}>Сервис по поиску вакансий</Link>
           <div className={styles.header__profileWrapper}>
-            <Link to="/" className={styles.header__profile}>Корзина</Link>
+            <Link to="/" className={styles.header__profile}>Отклики</Link>
             <span className={styles.header__spacer}>&nbsp;&nbsp;&nbsp;</span> {/* Увеличенный пробел */}
             <Link to="/" className={styles.header__profile}>Личный кабинет</Link>
           </div>
