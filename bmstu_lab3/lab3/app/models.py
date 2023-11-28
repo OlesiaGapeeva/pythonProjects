@@ -1,5 +1,38 @@
 from django.db import models
+from django.contrib.auth.models import PermissionsMixin , UserManager, AbstractBaseUser
 from django.contrib.postgres.fields import ArrayField
+from django.contrib.auth.models import Group, Permission
+
+class NewUserManager(UserManager):
+    def create_user(self,email,password=None, **extra_fields):
+        if not email:
+            raise ValueError('User must have an email address')
+        
+        email = self.normalize_email(email) 
+        user = self.model(email=email, **extra_fields) 
+        user.set_password(password)
+        user.save(using=self.db)
+        return user
+    class Meta:
+        managed = True
+
+class CustomUser(AbstractBaseUser, PermissionsMixin):
+    email = models.EmailField(("email адрес"), unique=True)
+    password = models.CharField(max_length=150, verbose_name="Пароль") 
+    full_name = models.CharField(max_length=50, default='', verbose_name='ФИО')
+    phone_number = models.CharField(max_length=30, default='', verbose_name='Номер телефона')   
+    is_staff = models.BooleanField(default=False, verbose_name="Является ли пользователь менеджером?")
+    is_superuser = models.BooleanField(default=False, verbose_name="Является ли пользователь админом?")
+
+    USERNAME_FIELD = 'email'
+
+    groups = models.ManyToManyField(Group, related_name='custom_users', related_query_name='custom_user')
+    user_permissions = models.ManyToManyField(Permission, related_name='custom_users', related_query_name='custom_user')
+
+    objects =  NewUserManager()
+
+    class Meta:
+        managed = True
 
 class Responses(models.Model):
     STATUS_CHOICES = [
@@ -13,8 +46,8 @@ class Responses(models.Model):
     creation_date = models.DateTimeField(blank=True, null=True)
     editing_date = models.DateTimeField(blank=True, null=True)
     approving_date = models.DateTimeField(blank=True, null=True)
-    id_moderator = models.ForeignKey('Users', on_delete=models.CASCADE,  db_column='id_moderator', related_name='moderator_responses')
-    id_user = models.ForeignKey('Users', on_delete=models.CASCADE, db_column='id_user', related_name='user_responses')
+    id_moderator = models.ForeignKey('CustomUser', on_delete=models.CASCADE,  db_column='id_moderator', related_name='moderator_responses', blank=True, null=True)
+    id_user = models.ForeignKey('CustomUser', on_delete=models.CASCADE, db_column='id_user', related_name='user_responses')
 
     class Meta:
         managed = False
@@ -30,14 +63,14 @@ class ResponsesVacancies(models.Model):
         db_table = 'responses_vacancies'
 
 
-class Users(models.Model):
-    login = models.CharField(blank=True, null=True)
-    passw = models.CharField(blank=True, null=True)
-    role = models.CharField(blank=True, null=True)
+# class Users(models.Model):
+#     login = models.CharField(blank=True, null=True)
+#     passw = models.CharField(blank=True, null=True)
+#     role = models.CharField(blank=True, null=True)
 
-    class Meta:
-        managed = False
-        db_table = 'users'
+#     class Meta:
+#         managed = False
+#         db_table = 'users'
 
 
 class Vacancies(models.Model):
@@ -51,8 +84,8 @@ class Vacancies(models.Model):
     exp = models.CharField(max_length=255, blank=True)
     image = models.TextField(blank=True, null=True)
     info = models.TextField(blank=True, null=True)
-    requirements = ArrayField(models.TextField(blank=True), blank=True)
-    conditions = ArrayField(models.TextField(blank=True), blank=True)
+    # requirements = ArrayField(models.TextField(blank=True), blank=True)
+    # conditions = ArrayField(models.TextField(blank=True), blank=True)
     STATUS_CHOICES = [
         ('enabled', 'enabled'),
         ('deleted', 'deleted'),
