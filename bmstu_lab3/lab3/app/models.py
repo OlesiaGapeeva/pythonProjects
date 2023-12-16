@@ -48,6 +48,7 @@ class Responses(models.Model):
     approving_date = models.DateTimeField(blank=True, null=True)
     id_moderator = models.ForeignKey('CustomUser', on_delete=models.CASCADE,  db_column='id_moderator', related_name='moderator_responses', blank=True, null=True)
     id_user = models.ForeignKey('CustomUser', on_delete=models.CASCADE, db_column='id_user', related_name='user_responses')
+    suite = models.CharField()
 
     class Meta:
         managed = False
@@ -59,6 +60,9 @@ class ResponsesVacancies(models.Model):
     id_vacancies = models.ForeignKey('Vacancies', models.DO_NOTHING, db_column='id_vacancies', blank=True, null=True)
 
     class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['id_responses', 'id_vacancies'], name='composite_key')
+        ]
         managed = False
         db_table = 'responses_vacancies'
 

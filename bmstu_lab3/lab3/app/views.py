@@ -1,4 +1,5 @@
 from django.shortcuts import get_object_or_404
+import requests
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import viewsets
@@ -6,6 +7,7 @@ from app.serializers import *
 from app.models import *
 from minio import Minio
 from rest_framework import status
+from django.http import HttpResponseBadRequest
 from datetime import datetime
 from django.contrib.auth import authenticate, login, logout
 from django.http import HttpResponse
@@ -34,6 +36,9 @@ from django.conf import settings
 import redis
 import uuid
 from django.contrib.sessions.models import Session
+from django.http import JsonResponse
+from django.db.models import Q
+
 
 session_storage = redis.StrictRedis(host=settings.REDIS_HOST, port=settings.REDIS_PORT)
 
@@ -97,11 +102,12 @@ def GetVacancies(request):
     keyword = request.query_params.get('keyword')  # Получаем значение параметра "keyword" из запроса
     if keyword:
         keyword = keyword[0].upper() + keyword[1:]
-        vacancies = Vacancies.objects.filter(status='enabled').filter(title=keyword)
+        vacancies = Vacancies.objects.filter(status='enabled').filter(title__icontains=keyword)
         if not vacancies.exists():
             return Response("Такой вакансии нет")
 
-    vacancies = Vacancies.objects.filter(status='enabled')
+    else:
+        vacancies = Vacancies.objects.filter(status='enabled')
     
     try:
         ssid = request.COOKIES["session_id"]
@@ -141,24 +147,6 @@ def PostVacancies(request):
     if not serializer.is_valid():
         return Response(serializer.errors)
     nv = serializer.save()
-    #картинки выгрузить в minio и в поле в бд внести адрес к этому объекту в хранилище
-    client = Minio(endpoint="localhost:9000",
-                   access_key='minioadmin',
-                   secret_key='minioadmin',
-                   secure=False)
-    i=nv.id
-    img_obj_name = f"vac_{i}.png"
-    nv.save()
-    # Загружаем изображение в Minio
-    # try:
-    #     client.fput_object(bucket_name='img',
-    #                        object_name=img_obj_name,
-    #                        file_path=request.data["image"])
-    #     nv.image = f"https://localhost:9000/img/{img_obj_name}"
-    # # except Exception as e:
-    #     return Response({"error": str(e)})
-
-
     vacancies = Vacancies.objects.filter(status="enabled")
     serializer = VacanciesSerializer(vacancies, many=True)
     return Response(serializer.data)
@@ -175,6 +163,42 @@ def DeleteVac(request, pk):
     vacancy = Vacancies.objects.filter(status="enabled")
     serializer = VacanciesSerializer(vacancy, many=True)
     return Response(serializer.data)
+
+
+@api_view(['POST'])
+@parser_classes([MultiPartParser])
+@permission_classes([IsManager])
+def postImageToVacancies(request, pk):
+    if 'file' in request.FILES:
+        file = request.FILES['file']
+        vacancy = Vacancies.objects.get(pk=pk, status='enabled')
+        
+        client = Minio(endpoint="localhost:9000",
+                       access_key='minioadmin',
+                       secret_key='minioadmin',
+                       secure=False)
+
+        bucket_name = 'images'
+        file_name = file.name
+        file_path = "http://localhost:9000/images/" + file_name
+        
+        try:
+            client.put_object(bucket_name, file_name, file, length=file.size, content_type=file.content_type)
+            print("Файл успешно загружен в Minio.")
+            
+            serializer = VacanciesSerializer(instance=vacancy, data={'image': file_path}, partial=True)
+            if serializer.is_valid():
+                serializer.save()
+                return HttpResponse('Image uploaded successfully.')
+            else:
+                return HttpResponseBadRequest('Invalid data.')
+        except Exception as e:
+            print("Ошибка при загрузке файла в Minio:", str(e))
+            return HttpResponseServerError('An error occurred during file upload.')
+
+    return HttpResponseBadRequest('Invalid request.')
+
+
 
 @swagger_auto_schema(method='put', request_body=VacanciesSerializer)
 @api_view(['PUT'])
@@ -267,14 +291,16 @@ def AddVacToRes(request, pk):
         return Response("Такой вакансии нет", status=400)
     try:
         id_vacancies = ResponsesVacancies.objects.get(id_responses=id_responses, id_vacancies=vacancies) # проверка есть ли такая м-м
-        return Response(f"Такой отклик на эту вакансию уже есть")
+        return Response(f"Такой отклик на эту вакансию уже есть", status=400)
     except ResponsesVacancies.DoesNotExist:
         rv = ResponsesVacancies(                            # если нет, создаем м-м
             id_responses=resp, id_vacancies=vacancies
         )
         rv.save()
-    resp = Responses.objects.filter(id_user=current_user, status='registered')
-    serializer = ResponsesSerializer(resp, many = True)
+    # resp = Responses.objects.filter(id_user=current_user, status='registered')
+    # serializer = ResponsesSerializer(resp, many = True)
+    addedvac = Vacancies.objects.get(pk = pk)
+    serializer = VacanciesSerializer(addedvac)
     return Response(serializer.data)
 
 #Responces
@@ -303,8 +329,16 @@ def GetResponses(request):
     filter_kwargs = {
         'creation_date__range': (start, end),
     }
+    # if status:
+    #     filter_kwargs['status'] = status
+
     if status:
-        filter_kwargs['status'] = status
+        if status != 'deleted':
+                # Используем Q-объект для исключения заявок со статусом "deleted"
+            filter_kwargs['status'] = ~Q(status='deleted')
+        else:
+            # Если параметр статуса не указан, исключаем заявки со статусом "deleted"
+            filter_kwargs['status'] = ~Q(status='deleted')
 
     if current_user.is_superuser: # Модератор может смотреть заявки всех пользователей
         resp = Responses.objects.filter(**filter_kwargs).order_by('creation_date')
@@ -337,12 +371,11 @@ def GetResponse(request, pk):
             vac_resp = ResponsesVacancies.objects.filter(id_responses=resp)
             vacancy_ids = [rv.id_vacancies.id for rv in vac_resp]
             vacancies = Vacancies.objects.filter(id__in=vacancy_ids)
-            vacancy_names = [vacancy.title for vacancy in vacancies]
-            print(vacancy_names)
+            vacancies_serializer = VacanciesSerializer(vacancies, many= True)
             response_data = {
                 'response': resp_serializer.data,
                 'id_vac':vacancy_ids,
-                'vacancies':  vacancy_names
+                'vacancies':  vacancies_serializer.data
             }
             return Response(response_data)
         else:
@@ -352,12 +385,10 @@ def GetResponse(request, pk):
                 vac_resp = ResponsesVacancies.objects.filter(id_responses=resp)
                 vacancy_ids = [rv.id_vacancies.id for rv in vac_resp]
                 vacancies = Vacancies.objects.filter(id__in=vacancy_ids)
-                vacancy_names = [vacancy.title for vacancy in vacancies]
-                print(vacancy_names)
+                vacancies_serializer = VacanciesSerializer(vacancies, many= True)
                 response_data = {
                     'response': resp_serializer.data,
-                    'id_vac':vacancy_ids,
-                    'vacancies':  vacancy_names
+                    'vacancies': vacancies_serializer.data
             }
                 return Response(response_data)
             except Responses.DoesNotExist:
@@ -378,6 +409,7 @@ def DeleteResponce(request):
     try: 
         resp = Responses.objects.get(id_user=current_user, status="registered")
         resp.status = "delited"
+        resp.editing_date=datetime.now()
         resp.save()
         return Response({'status': 'Success'})
     except:
@@ -444,6 +476,7 @@ def ToResponce(request):
     try: 
         resp = Responses.objects.get(id_user=current_user, status="registered")
         resp.status = "made"
+        resp.editing_date_date=datetime.now()
         resp.save()
         return Response({"Cформировано, отправлено на проверку модератору"})
     except:
@@ -570,3 +603,65 @@ def user_info(request):
             return Response({'status': 'Error', 'message': 'Session does not exist'})
     except:
         return Response({'status': 'Error', 'message': 'Cookies are not transmitted'})
+    
+    
+@api_view(['GET'])
+def handle_async_task(request):
+    print("HHHHHHHHh")
+    resp_id = int(request.data.get('resp_id'))
+    token = 4321
+    print(resp_id)
+    second_service_url = "http://localhost:8088/async_task"
+    data = {
+        'resp_id': resp_id,
+        'token': token
+    }
+
+    headers = {
+        'Content-Type': 'application/json'
+    }
+
+    response = requests.post(second_service_url, data=data)
+    exp = Responses.objects.get(id=resp_id)
+    
+    # Обработка ответа от второго сервиса
+    if response.status_code == 200:
+        exp.suite = "Отправлено на ревью"
+        exp.save()
+        serializer = ResponsesSerializer(exp)
+        return Response(serializer.data)
+    else:
+        return Response(data={'error': 'Запрос завершился с кодом: {}'.format(response.status_code)},
+                        status=response.status_code)
+
+@api_view(['PUT'])
+@permission_classes([AllowAny])
+def put_async(request, format=None):
+    """
+    Обновляет данные 
+    """
+    print("вызвалось")
+    # Проверка метода запроса (должен быть PUT)
+    if request.method != 'PUT':
+        return Response({'error': 'Метод не разрешен'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+
+    exp_id = request.data.get('resp_id')
+    result = request.data.get('suite')
+
+    # Проверка наличия всех необходимых параметров
+    if not exp_id or not result :
+        return Response({'error': 'Отсутствуют необходимые данные'}, status=status.HTTP_400_BAD_REQUEST)
+
+  
+
+    try:
+        exp = Responses.objects.get(id=exp_id)
+    except Responses.DoesNotExist:
+        return Response({'error': 'Отклик не найден'}, status=status.HTTP_404_NOT_FOUND)
+
+    exp.suite = str(result) + " %"
+    exp.save()
+    serializer = ResponsesSerializer(exp)
+    print(serializer.data)
+    return Response(serializer.data)
+

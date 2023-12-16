@@ -40,7 +40,7 @@ urlpatterns = [
     path('vacancies/<int:pk>/delete', views.DeleteVac, name = 'vacancy_del'),
     path('vacancies/<int:pk>/put/', views.PutVacancy, name = 'vacancy_put'),
     path('vacancies/<int:pk>/add/', views.AddVacToRes, name = 'vacancy_add'),
-
+    path('vacancies/<int:pk>/image', views.postImageToVacancies, name="post-image-to-vacancies"),
     #Resp
     path('resp/', views.GetResponses, name = 'responses'),
     path('resp/<int:pk>/', views.GetResponse, name = 'response'),
@@ -48,6 +48,9 @@ urlpatterns = [
     path('resp/<int:pk>/put', views.PutResponce, name = 'resp_put'),
     path('resp/<int:pk>/confirm/', views.ConfirmResponce, name = 'resp_confirm'),
     path('resp/made/', views.ToResponce, name = 'resp_made'),
+    path('async_task', views.handle_async_task, name = 'async_task'),
+    path('resp/update_async/', views.put_async, name = 'upd_async'),
+    
 
     #RespVac
     # path('rv/<int:pk>/put/', views.PutVacResp, name = 'rv_put'),

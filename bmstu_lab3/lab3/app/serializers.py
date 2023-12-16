@@ -31,7 +31,7 @@ class ResponsesSerializer(serializers.ModelSerializer):
     moderator = UserOnlySerializer(source='id_moderator')
     class Meta:
         model = Responses
-        fields = ['id', 'user', 'moderator', 'creation_date', 'editing_date', 'approving_date','status']
+        fields = ['id', 'user', 'moderator', 'creation_date', 'editing_date', 'approving_date','status', 'suite']
 
 class RespIdSerializer(serializers.ModelSerializer):
     class Meta:
